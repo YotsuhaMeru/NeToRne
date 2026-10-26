@@ -91,7 +91,8 @@ class DistributionTests(unittest.TestCase):
     def test_private_and_binary_paths_rejected(self):
         for name in ("archive/README.md", "rel/bondriver/README.md", "firmware/build/file.c",
                      "firmware/original.bin", "bondriver/Torne.dll", "linux/receiver/target/a.rs",
-                     "../README.md", "diagnostics/trace.json", "linux/report.json"):
+                     "../README.md", "diagnostics/trace.json", "linux/report.json",
+                     ".github/secrets.yml", ".github/workflows/private.yml"):
             with self.subTest(name=name), self.assertRaises(ValueError):
                 packager.validate_name(name)
 
@@ -101,6 +102,7 @@ class DistributionTests(unittest.TestCase):
         self.assertIn("linux/receiver/Cargo.lock", names)
         self.assertIn("bondriver/THIRD_PARTY_LICENSES.txt", names)
         self.assertIn("firmware/tools/apply-patch.py", names)
+        self.assertIn(".github/workflows/build.yml", names)
         for name, data in files:
             if not name.endswith(".md"):
                 continue

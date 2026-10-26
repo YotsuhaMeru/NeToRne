@@ -3,6 +3,11 @@
 !/.gitignore
 !/.gitattributes
 !/README.md
+!/.github/
+/.github/*
+!/.github/workflows/
+/.github/workflows/*
+!/.github/workflows/build.yml
 !/bondriver/
 !/linux/
 !/nixos/

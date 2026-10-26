@@ -48,6 +48,28 @@ sh linux/torne-recv --channel 20 --seconds 10 > sample.ts
 
 物理チャンネルは受信地域に合わせて指定してください。USB 権限、Mirakurun、NixOS の設定は [Linux の利用方法](linux/README.md) に記載しています。
 
+## GitHub Actions の自動ビルド
+
+GitHub へ push するか PR を作成・更新すると、`Build binaries` が以下の 2 種類をビルドします。Actions タブから `Run workflow` で手動実行もできます。完了した実行の Artifacts からダウンロードしてください。保存期間は 30 日です。
+
+| Artifact | 内容 |
+| --- | --- |
+| `BonDriver_Torne-windows-x64` | 通常版 DLL、INI、第三者ライセンス表記、SHA-256 一覧 |
+| `torne-recv-linux-x86_64` | `torne-recv` 単体の tar.gz、SHA-256 一覧 |
+
+`v` で始まるタグ（例: `v0.1.0`）を push すると、両方のビルド・テストが成功した後に GitHub Release を作成し、`BonDriver_Torne-windows-x64.zip`、`torne-recv-linux-x86_64.tar.gz`、両アーカイブの `SHA256SUMS` を添付します。通常のブランチ push・PR では Artifacts の保存まで行います。同じタグの実行を再実行すると、既存 Release の同名ファイルを更新します。
+
+変更をコミット・push した後、リリースするコミットにタグを付けて送信します。
+
+```sh
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+Windows は Zig 0.15.2、Linux は Ubuntu 22.04 と stable Rust を使います。Linux の tar.gz は実行権限を保持し、`tar -xzf torne-recv-linux-x86_64.tar.gz` で展開できます。実行先には glibc 2.35 以降と libusb 1.0 の共有ライブラリが必要です（Debian / Ubuntu では `libusb-1.0-0`）。資材の場所は `--root` で指定してください。BonDriver の INI は配置後に `Root` を資材の絶対パスへ変更してください。
+
+ビルドと USB を開かないテストを実行し、BonDriver と Linux 受信機だけを成果物にします。ファームウェアや復号済みモジュールは不要で、成果物にも含みません。実行時には引き続き [利用前の準備](#利用前の準備) のファイルが必要です。
+
 ## ファームウェアのパッチ
 
 Python 3.10 以降の標準ライブラリだけで元ファイルへ差分を適用できます。SPI ダンプや追加 Python パッケージは不要です。

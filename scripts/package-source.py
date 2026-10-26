@@ -5,7 +5,7 @@ import subprocess
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
-TOP_LEVEL = {".gitignore", ".gitattributes", "README.md"}
+TOP_LEVEL = {".gitignore", ".gitattributes", "README.md", ".github/workflows/build.yml"}
 DIRECTORIES = {"bondriver", "linux", "nixos", "windows", "firmware", "scripts", "tests"}
 EXTENSIONS = {".md", ".txt", ".c", ".cpp", ".h", ".s", ".ld", ".rs", ".py",
               ".ps1", ".ini", ".cfg", ".rules", ".yml", ".nix", ".toml", ".lock", ".json"}

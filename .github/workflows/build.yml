@@ -1,0 +1,135 @@
+name: Build binaries
+
+on:
+  push:
+    branches: ['**']
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  bondriver:
+    name: BonDriver / Windows x64
+    runs-on: windows-2022
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Install Zig 0.15.2
+        run: |
+          $archive = Join-Path $env:RUNNER_TEMP 'zig.zip'
+          Invoke-WebRequest 'https://ziglang.org/download/0.15.2/zig-x86_64-windows-0.15.2.zip' -OutFile $archive
+          $expected = '3a0ed1e8799a2f8ce2a6e6290a9ff22e6906f8227865911fb7ddedc3cc14cb0c'
+          if ((Get-FileHash $archive -Algorithm SHA256).Hash.ToLowerInvariant() -ne $expected) {
+            throw 'Zig archive SHA-256 mismatch'
+          }
+          Expand-Archive -LiteralPath $archive -DestinationPath $env:RUNNER_TEMP
+          Join-Path $env:RUNNER_TEMP 'zig-x86_64-windows-0.15.2' | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
+      - name: Build BonDriver
+        run: ./bondriver/build.ps1
+      - name: Test recovery logic
+        run: ./bondriver/test-recovery.ps1
+      - name: Prepare artifact
+        run: |
+          Copy-Item bondriver/THIRD_PARTY_LICENSES.txt bondriver/dist/
+          $files = @('BonDriver_Torne.dll', 'BonDriver_Torne.ini', 'THIRD_PARTY_LICENSES.txt')
+          $files | ForEach-Object {
+            $hash = (Get-FileHash (Join-Path 'bondriver/dist' $_) -Algorithm SHA256).Hash.ToLowerInvariant()
+            "$hash  $_"
+          } | Set-Content bondriver/dist/SHA256SUMS -Encoding ascii
+      - uses: actions/upload-artifact@v7
+        with:
+          name: BonDriver_Torne-windows-x64
+          path: |
+            bondriver/dist/BonDriver_Torne.dll
+            bondriver/dist/BonDriver_Torne.ini
+            bondriver/dist/THIRD_PARTY_LICENSES.txt
+            bondriver/dist/SHA256SUMS
+          if-no-files-found: error
+          retention-days: 30
+
+  release:
+    name: Publish GitHub Release
+    needs: [bondriver, linux]
+    if: startsWith(github.ref, 'refs/tags/v') && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - name: Download BonDriver
+        uses: actions/download-artifact@v8
+        with:
+          name: BonDriver_Torne-windows-x64
+          path: artifacts/bondriver
+      - name: Download Linux receiver
+        uses: actions/download-artifact@v8
+        with:
+          name: torne-recv-linux-x86_64
+          path: artifacts/linux
+      - name: Package release assets
+        run: |
+          mkdir -p release
+          (cd artifacts/bondriver && zip -9 ../../release/BonDriver_Torne-windows-x64.zip BonDriver_Torne.dll BonDriver_Torne.ini THIRD_PARTY_LICENSES.txt SHA256SUMS)
+          cp artifacts/linux/torne-recv-linux-x86_64.tar.gz release/
+          cd release
+          sha256sum BonDriver_Torne-windows-x64.zip torne-recv-linux-x86_64.tar.gz > SHA256SUMS
+          sha256sum --check SHA256SUMS
+      - name: Create or update release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          assets=(release/BonDriver_Torne-windows-x64.zip release/torne-recv-linux-x86_64.tar.gz release/SHA256SUMS)
+          if gh release view "$RELEASE_TAG" > /dev/null 2>&1; then
+            gh release upload "$RELEASE_TAG" "${assets[@]}" --clobber
+          else
+            gh release create "$RELEASE_TAG" "${assets[@]}" --verify-tag --title "$RELEASE_TAG" --generate-notes
+          fi
+
+  linux:
+    name: torne-recv / Linux x86_64
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    env:
+      CARGO_TERM_COLOR: always
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y build-essential pkg-config libusb-1.0-0-dev
+          rustup toolchain install stable --profile minimal --no-self-update
+      - name: Test receiver
+        run: cargo +stable test --locked --manifest-path linux/receiver/Cargo.toml
+      - name: Build receiver
+        run: cargo +stable build --release --locked --manifest-path linux/receiver/Cargo.toml
+      - name: Check CLI and package binary
+        run: |
+          linux/receiver/target/release/torne-recv --help
+          mkdir -p linux/dist
+          tar -czf linux/dist/torne-recv-linux-x86_64.tar.gz -C linux/receiver/target/release torne-recv
+          cd linux/dist
+          sha256sum torne-recv-linux-x86_64.tar.gz > SHA256SUMS
+      - uses: actions/upload-artifact@v7
+        with:
+          name: torne-recv-linux-x86_64
+          path: |
+            linux/dist/torne-recv-linux-x86_64.tar.gz
+            linux/dist/SHA256SUMS
+          if-no-files-found: error
+          retention-days: 30
