@@ -1,0 +1,48 @@
+#!/bin/sh
+# Keep a Mirakurun tuner pipe alive across receiver startup and USB failures.
+# The receiver's saved nextSequence lets each fresh process recover a firmware
+# error state through the protocol before it uploads firmware again.
+set -u
+
+receiver_root=${TORNE_ROOT:-$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)}
+receiver_binary=${TORNE_BINARY:-"$receiver_root/linux/receiver/target/release/torne-recv"}
+restart_delay=${TORNE_RESTART_DELAY:-3}
+case "$restart_delay" in
+  ''|*[!0-9]*) restart_delay=3 ;;
+esac
+if [ "$restart_delay" -lt 1 ] || [ "$restart_delay" -gt 60 ]; then
+  restart_delay=3
+fi
+if [ ! -x "$receiver_binary" ]; then
+  echo "torne watchdog: receiver binary not found: $receiver_binary" >&2
+  exit 1
+fi
+
+stopping=0
+child=
+stop() {
+  stopping=1
+  if [ -n "$child" ]; then
+    kill -TERM "$child" 2>/dev/null || true
+  fi
+}
+trap stop TERM INT
+
+attempt=0
+while [ "$stopping" -eq 0 ]; do
+  "$receiver_binary" --root "$receiver_root" "$@" &
+  child=$!
+  wait "$child"
+  status=$?
+  child=
+  if [ "$stopping" -ne 0 ] || [ "$status" -eq 0 ]; then
+    exit 0
+  fi
+  attempt=$((attempt + 1))
+  echo "torne watchdog: receiver exited with status $status; retry $attempt in ${restart_delay}s" >&2
+  sleep "$restart_delay" &
+  child=$!
+  wait "$child" || true
+  child=
+done
+exit 0

@@ -1,0 +1,5 @@
+- name: Sony torne CECH-ZD1J
+  types:
+    - GR
+  command: /opt/tvtuner/linux/torne-recv-watchdog --channel <channel> --state-dir /var/lib/torne-receiver
+  isDisabled: false

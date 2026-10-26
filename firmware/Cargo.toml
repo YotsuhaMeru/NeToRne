@@ -1,0 +1,16 @@
+[package]
+name = "torne-firmware-core"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.85"
+description = "no_std TS and lifecycle core for the CECH-ZD1J firmware rewrite"
+publish = false
+
+[lib]
+path = "src/lib.rs"
+
+[profile.release]
+panic = "abort"
+lto = true
+codegen-units = 1
+

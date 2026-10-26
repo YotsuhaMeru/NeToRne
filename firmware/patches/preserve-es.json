@@ -1,0 +1,23 @@
+{
+  "format": "torne-xor-v1",
+  "variant": "preserve-es",
+  "input_name": "mb86h47_aac_trc.bin",
+  "input_sha256": "653f2377c838a4e7276b447fd992084d5e6e84a90ac4d389851f82309b662a04",
+  "output_name": "mb86h47_aac_trc-preserve-es.bin",
+  "output_sha256": "04e2c3b996346a0752d8bec8bae573a9fb2e4aa9cb8250d9fec8956eb6266d4f",
+  "size": 726768,
+  "segments": [
+    {
+      "offset": 176728,
+      "xor": "08e4280c8f74d512"
+    },
+    {
+      "offset": 177464,
+      "xor": "d1298cad2f3791aa"
+    },
+    {
+      "offset": 200960,
+      "xor": "d361246b1b781e8f"
+    }
+  ]
+}

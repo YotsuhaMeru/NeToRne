@@ -1,0 +1,32 @@
+# Physical channels received at this antenna on 2026-10-11.
+# Service IDs are omitted so Mirakurun scans all services on each multiplex.
+- name: NHK Eテレ・名古屋
+  type: GR
+  channel: '13'
+- name: 三重テレビ
+  type: GR
+  channel: '14'
+- name: CCNet12
+  type: GR
+  channel: '15'
+- name: CCNet11
+  type: GR
+  channel: '16'
+- name: CBCテレビ
+  type: GR
+  channel: '18'
+- name: 中京テレビ
+  type: GR
+  channel: '19'
+- name: NHK総合・名古屋
+  type: GR
+  channel: '20'
+- name: 東海テレビ
+  type: GR
+  channel: '21'
+- name: メ〜テレ
+  type: GR
+  channel: '22'
+- name: テレビ愛知
+  type: GR
+  channel: '23'

@@ -1,0 +1,15 @@
+* text=auto
+*.rs text eol=lf
+*.c text eol=lf
+*.cpp text eol=lf
+*.h text eol=lf
+*.s text eol=lf
+*.ld text eol=lf
+*.py text eol=lf
+*.ps1 text eol=lf
+*.md text eol=lf
+*.nix text eol=lf
+*.yml text eol=lf
+*.json text eol=lf
+linux/torne-recv text eol=lf
+linux/torne-recv-watchdog text eol=lf

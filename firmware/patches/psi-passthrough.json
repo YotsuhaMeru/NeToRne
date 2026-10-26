@@ -1,0 +1,47 @@
+{
+  "format": "torne-xor-v1",
+  "variant": "psi-passthrough",
+  "input_name": "mb86h47_aac_trc.bin",
+  "input_sha256": "653f2377c838a4e7276b447fd992084d5e6e84a90ac4d389851f82309b662a04",
+  "output_name": "mb86h47_aac_trc-psi-passthrough.bin",
+  "output_sha256": "5aa34270a7647264a5676867fdbbdd22b2c0cb6bb0644cf7c136e5d60bf7edcc",
+  "size": 726768,
+  "segments": [
+    {
+      "offset": 176728,
+      "xor": "08e4280c8f74d512"
+    },
+    {
+      "offset": 177464,
+      "xor": "d1298cad2f3791aa"
+    },
+    {
+      "offset": 200960,
+      "xor": "d361246b1b781e8f"
+    },
+    {
+      "offset": 688632,
+      "xor": "485adc579f30a92c"
+    },
+    {
+      "offset": 690384,
+      "xor": "50324cba1eee67d9"
+    },
+    {
+      "offset": 700320,
+      "xor": "e822978e15673c29"
+    },
+    {
+      "offset": 714520,
+      "xor": "485adc579f30a92c"
+    },
+    {
+      "offset": 716272,
+      "xor": "50324cba1eee67d9"
+    },
+    {
+      "offset": 726208,
+      "xor": "e822978e15673c29"
+    }
+  ]
+}

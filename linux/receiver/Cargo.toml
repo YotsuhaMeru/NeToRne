@@ -1,0 +1,31 @@
+[package]
+name = "torne-recv"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.85"
+description = "Native CECH-ZD1J receiver for Mirakurun"
+
+[features]
+vendored-libusb = ["rusb/vendored"]
+
+[dependencies]
+anyhow = "1"
+aes = "0.8"
+clap = { version = "4.5", features = ["derive"] }
+fs2 = "0.4"
+md-5 = "0.10"
+rand = "0.8"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha1 = "0.10"
+sha2 = "0.10"
+
+[target.'cfg(unix)'.dependencies]
+libc = "0.2"
+rusb = "0.9"
+signal-hook = "0.3"
+
+[profile.release]
+lto = true
+codegen-units = 1
+strip = true

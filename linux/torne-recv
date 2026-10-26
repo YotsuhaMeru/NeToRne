@@ -1,0 +1,9 @@
+#!/bin/sh
+set -eu
+receiver_root=${TORNE_ROOT:-$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)}
+receiver_binary=${TORNE_BINARY:-"$receiver_root/linux/receiver/target/release/torne-recv"}
+if [ ! -x "$receiver_binary" ]; then
+  echo "torne: Rust receiver not found: $receiver_binary (see linux/README.md)" >&2
+  exit 1
+fi
+exec "$receiver_binary" --root "$receiver_root" "$@"
