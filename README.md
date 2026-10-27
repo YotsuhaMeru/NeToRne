@@ -1,25 +1,19 @@
 # NeToRne
 
-CECH-ZD1J を Windows の TVTest、または Linux の Mirakurun から利用するためのソースコードと設定例です。Windows では C/C++ 製の BonDriver、Linux では Rust 製の受信プログラムを使います。
+CECH-ZD1J を Windows の TVTest、または Linux の Mirakurun から利用するためのソフトです。
 
 ## ダウンロード
 
-[Releases](https://github.com/YotsuhaMeru/NeToRne/releases) から、利用する OS 向けのファイルをダウンロードしてください。配布バイナリを使う場合、Zig や Rust によるビルドは不要です。
+[Releases](https://github.com/YotsuhaMeru/NeToRne/releases) から、それぞれの OS 向けのファイルをダウンロードしてください。
 
-| ファイル | 内容 |
-| --- | --- |
-| `BonDriver_Torne-windows-x64.zip` | Windows x64 用 BonDriver |
-| `torne-recv-linux-x86_64.tar.gz` | Linux x86_64 用の受信バイナリ `torne-recv` |
-| `SHA256SUMS` | 上記アーカイブの SHA-256 一覧 |
-
-Mirakurun の補助スクリプト・設定例やファームウェアのパッチ適用ツールは、同じ Release の `Source code` を展開して利用してください。バイナリのアーカイブには含まれません。
+Mirakurun の補助スクリプト・設定例やファームウェアのパッチ適用ツールは、このrepoをcloneして利用してください。リリースには含まれません。
 
 ## 収録内容
 
 | ディレクトリ | 内容 |
 | --- | --- |
 | [bondriver/](bondriver/README.md) | Windows x64 用 BonDriver、ビルド・テスト手順 |
-| [linux/](linux/README.md) | Rust 受信機、Mirakurun・udev 設定例 |
+| [linux/](linux/README.md) | Linux 受信ソフト、Mirakurun・udev 設定例 |
 | `nixos/` | Nix パッケージと NixOS モジュール |
 | [firmware/](firmware/README.md) | ファームウェアに適用できる差分パッチ、適用ツール、開発用 C/Rust ソース |
 | `windows/` | CECH-ZD1J 用 Zadig 設定例 |
@@ -29,7 +23,11 @@ Mirakurun の補助スクリプト・設定例やファームウェアのパッ�
 
 ## 準備
 
-CECH-ZD1J とアンテナが必要です。通常受信では B-CAS カードも必要です。次のファイルはディスク等から別途用意し、保存先のフォルダ内に以下の構成で配置してください。Windows では `C:/tvtuner`、Linux では `/opt/tvtuner` を例に説明します。実行時に各ファイルのハッシュを検証します。
+CECH-ZD1J とアンテナ、torneのディスクダンプが必要です。また、通常受信では B-CAS カードも必要です。
+
+次のファイルはtorneのディスク等から別途用意し、保存先のフォルダ内に以下の構成で配置してください。
+
+Windows では `C:/tvtuner`、Linux では `/opt/tvtuner` を例に説明します。実行時に各ファイルのハッシュを検証します。
 一部のファイルは暗号化されているため、復号化してから配置する必要があります。
 
 ```text
@@ -76,50 +74,13 @@ tar -xzf torne-recv-linux-x86_64.tar.gz
 
 Python 3.10 以降の標準ライブラリだけで元ファイルへ差分を適用できます。SPI ダンプや追加 Python パッケージは不要です。
 
-同じ Release の `Source code` を展開し、そのフォルダに [準備](#準備) で挙げたファイルを配置してください。そのフォルダをファームウェアやモジュールの保存先として、以下を実行します。
+このrepoをcloneし、フォルダ内に [準備](#準備) で挙げたファイルを配置してください。そのフォルダをファームウェアやモジュールの保存先として、以下を実行します。
 
 ```sh
 python firmware/tools/apply-patch.py --variant psi-passthrough
 ```
 
 入力と出力の SHA-256 を照合し、`firmware/build/` へ新規保存します。元ファイルは上書きしません。生成したファイルのパスを、INI や受信コマンドの引数に指定してください。方式・対応範囲は [パッチの説明](firmware/README.md) を参照してください。
-
-# 開発者向け
-
-## GitHub Actions の自動ビルド
-
-通常の push・PR では、BonDriver の C/C++ ソース・ヘッダー・PowerShell スクリプト・INI・第三者ライセンス表記、Linux 受信機の `src/`・`Cargo.toml`・`Cargo.lock`、またはビルドワークフローが変更されると、`Build binaries` が以下の 2 種類をビルドします。README やドキュメントだけの変更では実行しません。
-
-リリース用の `v*` タグ push と Actions タブの `Run workflow` による手動実行では、変更ファイルに関係なくビルドします。完了した実行の Artifacts からダウンロードしてください。保存期間は 30 日です。
-
-| Artifact | 内容 |
-| --- | --- |
-| `BonDriver_Torne-windows-x64` | 通常版 DLL、INI、第三者ライセンス表記、SHA-256 一覧 |
-| `torne-recv-linux-x86_64` | `torne-recv` 単体の tar.gz、SHA-256 一覧 |
-
-`v` で始まるタグ（例: `v0.1.0`）を push すると、両方のビルド・テストが成功した後に GitHub Release を作成し、`BonDriver_Torne-windows-x64.zip`、`torne-recv-linux-x86_64.tar.gz`、両アーカイブの `SHA256SUMS` を添付します。通常のブランチ push・PR では Artifacts の保存まで行います。同じタグでワークフローを再実行すると、既存 Release の同名ファイルを更新します。
-
-変更をコミット・push した後、リリースするコミットにタグを付けて送信します。
-
-```sh
-git tag v0.1.0
-git push origin v0.1.0
-```
-
-Windows は Zig 0.15.2、Linux は Ubuntu 22.04 と stable Rust を使います。ローカルでビルドする手順は [BonDriver](bondriver/README.md#ソースからビルドする場合) と [Linux 受信機](linux/README.md#ソースからビルドする場合) の README を参照してください。
-
-ビルドと USB を開かないテストを実行し、BonDriver と Linux 受信機だけを成果物にします。ビルドやテストにはファームウェアや復号済みモジュールは不要で、成果物にも含みません。受信プログラムの実行時には [準備](#準備) で挙げたファイルが必要です。
-
-## ソース配布アーカイブ
-
-```sh
-python scripts/package-source.py
-python -m unittest discover -s tests -p test_source_distribution.py
-```
-
-`dist/tvtuner-source.zip` と SHA-256 ファイルを生成します。Git が無視していないファイルだけを収録し、元ファームウェアやビルド生成物の混入を検査します。Git リポジトリで実行してください。コミットやリモートへの送信は行いません。
-
-Git 登録前に `git status --short --untracked-files=all` と `git add --dry-run .` で対象を確認できます。既存の `archive/`、`rel/`、`diagnostics/`、`research/`、TVTest フォルダはローカル保管用です。
 
 ## 制約とライセンス
 
