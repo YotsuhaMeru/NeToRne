@@ -4,7 +4,29 @@ on:
   push:
     branches: ['**']
     tags: ['v*']
+    paths:
+      - 'bondriver/*.c'
+      - 'bondriver/*.cpp'
+      - 'bondriver/*.h'
+      - 'bondriver/*.ps1'
+      - 'bondriver/BonDriver_Torne.ini'
+      - 'bondriver/THIRD_PARTY_LICENSES.txt'
+      - 'linux/receiver/src/**'
+      - 'linux/receiver/Cargo.toml'
+      - 'linux/receiver/Cargo.lock'
+      - '.github/workflows/build.yml'
   pull_request:
+    paths:
+      - 'bondriver/*.c'
+      - 'bondriver/*.cpp'
+      - 'bondriver/*.h'
+      - 'bondriver/*.ps1'
+      - 'bondriver/BonDriver_Torne.ini'
+      - 'bondriver/THIRD_PARTY_LICENSES.txt'
+      - 'linux/receiver/src/**'
+      - 'linux/receiver/Cargo.toml'
+      - 'linux/receiver/Cargo.lock'
+      - '.github/workflows/build.yml'
   workflow_dispatch:
 
 permissions:
