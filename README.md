@@ -84,7 +84,9 @@ python firmware/tools/apply-patch.py --variant psi-passthrough
 
 入力と出力の SHA-256 を照合し、`firmware/build/` へ新規保存します。元ファイルは上書きしません。生成したファイルのパスを、INI や受信コマンドの引数に指定してください。方式・対応範囲は [パッチの説明](firmware/README.md) を参照してください。
 
-## 開発者向け: GitHub Actions の自動ビルド
+# 開発者向け
+
+## GitHub Actions の自動ビルド
 
 通常の push・PR では、BonDriver の C/C++ ソース・ヘッダー・PowerShell スクリプト・INI・第三者ライセンス表記、Linux 受信機の `src/`・`Cargo.toml`・`Cargo.lock`、またはビルドワークフローが変更されると、`Build binaries` が以下の 2 種類をビルドします。README やドキュメントだけの変更では実行しません。
 
